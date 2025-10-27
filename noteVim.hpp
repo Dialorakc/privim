@@ -12,11 +12,10 @@ class VimBind {
         struct termios root, raw;
 
     public:
-        std::vector<std::string> command = {"\033[A", "\033[B", "\033[C", "\033[D", "\033", "\033[20;4H", "\033[K", "\033[s", "\033[u"};
-        std::vector<char> characters = {'j', 'k', 'l', 'h', 'D', 'g'};
+        std::vector<std::string> command = {"\033[A", "\033[B", "\033[C", "\033[D", "\033", "\033[20;4H", "\033[K", "\033[s", "\033[u", "\033[2K"};
         /*
          * 0 = k | 1 = j | 2 = h | 3 = l | 4 = esc
-         * 5 = gg | 6 = D | 7 = m | 8 = '
+         * 5 = ]] | 6 = D | 7 = m | 8 = ' | 9 = dd
          */
 
         VimBind(){
@@ -29,14 +28,16 @@ class VimBind {
 
         int termWidth(){ return termwidth; }
         int termHeight(){ return termheight; }
+        void setThinCursor(){ std::cout << "\033[6 q" << std::flush; }
+        void setBlockCursor(){ std::cout << "\033[2 q" << std::flush; }
 
         void enableRawMode(){
             tcgetattr(STDIN_FILENO, &root);
 
             raw = root;
-            raw.c_lflag &= ~(ICANON); // disable flags
-            raw.c_cc[VMIN] = 0; // minimum char
-            raw.c_cc[VTIME] = 1; // time to act
+            raw.c_lflag &= ~(ECHO | ICANON); // disable flags
+            raw.c_cc[VMIN] = 1; // minimum char
+            raw.c_cc[VTIME] = 0; // time to act
             tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
         }
         void disableRawMode(){

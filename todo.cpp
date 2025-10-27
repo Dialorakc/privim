@@ -16,14 +16,11 @@ class Funk {
 
             return 0;
         }
-        void debug(string &text){
-            std::cout << text;
-        }
 };
 
 int main(){
     int miliSec = 1000;
-    string border[] = {"│", "─"}, text;
+    string border[] = {"│", "─"};
     char word;
     bool end = 1;
     Funk funky;
@@ -62,43 +59,66 @@ int main(){
 
     /* Text handler */
     vim.enableRawMode();
+    vim.setThinCursor();
 
-    char cmd;
-    bool run = 1;
+    bool run = 1, writeMode = 1;
 
     while(run){
         int byte = read(STDIN_FILENO, &word, 1);
         std::cout << std::flush;
         // perror("read");
 
-        if (word == '\033'){
-            if (read(STDIN_FILENO, &cmd, 1) == 1){
-                switch(cmd){
-                    case 'k': {
-                                  std::cout << vim.command[0] << std::flush;
-                                  break;
-                              }
-                    case 'j': {
-                                  std::cout << vim.command[1] << std::flush;
-                                  break;
-                              }
-                    case 'h': {
-                                  std::cout << vim.command[2] << std::flush;
-                                  break;
-                              }
-                    case 'l': {
-                                  std::cout << vim.command[3] << std::flush;
-                                  break;
-                              }
-                    case 'q': run = 0;
-                              break;
-                    default: std::cout << "[Error on Esc handler]" << std::flush;
-                             break;
-                }
+        if (writeMode){
+            if (word == '\x7f') {
+                std::cout << "\b \b" << std::flush;  // Move back, write space, move back again
+                continue;
+            }
+            if (word == '\033'){
+                writeMode = 0;
+                vim.setBlockCursor();
+                continue;
+            }
+            if (word >= 32 && word <= 126){
+                std::cout << word << std::flush;
+            }
+            if (word == '\n' || word == '\r'){
+                std::cout << '\n' << std::flush;
             }
         }
-
-        usleep(10000);
+        else {
+            switch(word){
+                case 'k': {
+                              std::cout << vim.command[0] << std::flush;
+                              break;
+                          }
+                case 'j': {
+                              std::cout << vim.command[1] << std::flush;
+                              break;
+                          }
+                case 'l': {
+                              std::cout << vim.command[2] << std::flush;
+                              break;
+                          }
+                case 'h': {
+                              std::cout << vim.command[3] << std::flush;
+                              break;
+                          }
+                case 'D': {
+                              std::cout << vim.command[6] << std::flush;
+                              break;
+                          }
+                case 'd': {
+                              std::cout << vim.command[9] << std::flush;
+                              break;
+                          }
+                case 'i': writeMode = 1;
+                          vim.setThinCursor();
+                          break;
+                case 'q': std::cout << '\n';
+                          run = 0;
+                          break;
+            }
+        }
     };
 
     vim.disableRawMode();

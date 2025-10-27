@@ -43,9 +43,9 @@ class VimBind {
         void disableRawMode(){
             tcsetattr(STDIN_FILENO, TCSAFLUSH, &root);
         }
-        void rightCommand(std::string text){
+        void rightCommand(std::string text, int firNume, int secNume){
             std::cout << command[7];
-            std::cout << "\033[" << termWidth() << ";" << (termwidth / 2) - 4 << "H";
+            std::cout << "\033[" << termWidth() << ";" << (termwidth / firNume) - secNume << "H";
             std::cout << command[6];
             std::cout << text;
             std::cout << command[8];

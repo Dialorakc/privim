@@ -10,9 +10,18 @@ class Funk {
         int endRule(int mult, string border[ ], bool end){
             int con = 6;
             end == 1 ? std::cout << "╭" : std::cout << "╰";
-            for(int i = 0; i < mult - 1; i++){
+            for(int i = 0; i < mult - 2; i++){
                 std::cout << border[1];
             }
+            end == 1 ? std::cout << "╮" : std::cout << "╯";
+
+            return 0;
+        }
+        int sideRule(int mult, string border[ ], int side){
+            for(int i = 0; i < mult - side; i++){
+                std::cout << " ";
+            }
+            std::cout << border[0];
 
             return 0;
         }
@@ -47,21 +56,20 @@ int main(){
     funky.endRule(mult, border, end);
     std::cout << '\n' << border[0] << '\n';
     std::cout << border[0] << "  This is a simple note taking program with nvim integration\n";
-    end = 0;
-    funky.endRule(mult, border, end);
+    funky.endRule(mult, border, 0);
     std::cout << '\n';
 
-    end = 1;
-    funky.endRule(mult, border, end);
+    funky.endRule(mult, border, 1);
     std::cout << '\n' << border[0] << '\n';
     vim.termHeight();
-    vim.rightCommand("@Dialore.");
+    vim.rightCommand("@Dialore.", 2, 4);
 
     /* Text handler */
     vim.enableRawMode();
     vim.setThinCursor();
 
     bool run = 1, writeMode = 1;
+    std::cout << border[0] << "  " << std::flush;
 
     while(run){
         int byte = read(STDIN_FILENO, &word, 1);
@@ -82,7 +90,9 @@ int main(){
                 std::cout << word << std::flush;
             }
             if (word == '\n' || word == '\r'){
-                std::cout << '\n' << std::flush;
+                std::cout << '\n' << border[0] << "  " << std::flush;
+                funky.sideRule(mult, border, 4);
+                std::cout << '\n' << border[0] << "  " << std::flush;
             }
         }
         else {
@@ -123,8 +133,7 @@ int main(){
 
     vim.disableRawMode();
 
-    end = 0;
-    funky.endRule(mult, border, end);
+    funky.endRule(mult, border, 0);
     std::cout << '\n';
 
     usleep(1000 * miliSec);

@@ -1,7 +1,6 @@
-
- **  /\_/\  **
- ** ( o.o )  privim v0.0 **
- **  > ^ <   (purr responsibly) **
+     /\_/\  
+    ( o.o )  privim v0.0
+     > ^ <   (purr responsibly)
 
 *pronounced "purr-vim" if you're feeling fancy*
 

@@ -1,8 +1,8 @@
      /\_/\  
-    ( o.o )  privim v0.0
+    ( o.o )  privim v0.01
      > ⋈ <   (purr responsibly)
 
-*pronounced "purr-vim" if you're feeling fancy*
+*pronounced "prri-vim" if you're feeling fancy*
 
 ## Features
 - **Fast**: Written in C++ for maximum performance

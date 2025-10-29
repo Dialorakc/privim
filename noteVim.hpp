@@ -1,4 +1,5 @@
 #include <sys/ioctl.h>
+#include <csignal>
 #include <cstdlib>
 #include <term.h>
 #include <unistd.h>
@@ -11,8 +12,13 @@ class VimBind {
         int termheight;
         struct termios root, raw;
 
+        static volatile sig_atomic_t winResize;
+        static void resizeHandler(int sig){
+            winResize = 1;
+        }
+
     public:
-        std::vector<std::string> command = {"\033[A", "\033[B", "\033[C", "\033[D", "\033", "\033[20;4H", "\033[K", "\033[s", "\033[u", "\033[2K"};
+        std::string command[10] = {"\033[A", "\033[B", "\033[C", "\033[D", "\033", "\033[20;4H", "\033[K", "\033[s", "\033[u", "\033[2K"};
         /*
          * 0 = k | 1 = j | 2 = h | 3 = l | 4 = esc
          * 5 = ]] | 6 = D | 7 = m | 8 = ' | 9 = dd
@@ -24,6 +30,7 @@ class VimBind {
 
             termheight = win.ws_row;
             termwidth= win.ws_col;
+            signal(SIGWINCH, resizeHandler);
         }
 
         int termWidth(){ return termwidth; }
@@ -31,6 +38,19 @@ class VimBind {
         void setThinCursor(){ std::cout << "\033[6 q" << std::flush; }
         void setBlockCursor(){ std::cout << "\033[2 q" << std::flush; }
 
+        bool termPosUpdater(){
+            if (winResize){
+                struct winsize win;
+                ioctl(STDOUT_FILENO, TIOCGWINSZ, &win);
+
+                termheight = win.ws_row;
+                termwidth= win.ws_col;
+                winResize = 0;
+
+                return 1;
+            }
+            return 0;
+        }
         void enableRawMode(){
             tcgetattr(STDIN_FILENO, &root);
 
@@ -45,7 +65,7 @@ class VimBind {
         }
         void rightCommand(std::string text, int firNume, int secNume){
             std::cout << command[7];
-            std::cout << "\033[" << termWidth() << ";" << (termwidth / firNume) - secNume << "H";
+            std::cout << "\033[" << termheight << ";" << (termwidth / firNume) - secNume << "H";
             std::cout << command[6];
             std::cout << text;
             std::cout << command[8];
@@ -53,9 +73,11 @@ class VimBind {
         }
         void rightCommandClear(){
             std::cout << command[7];
-            std::cout << "\033[" << termWidth() << ";4H";
+            std::cout << "\033[" << termheight << ";4H";
             std::cout << command[6];
             std::cout << command[8];
             std::cout << std::flush;
         }
 };
+
+volatile sig_atomic_t VimBind::winResize = 0;

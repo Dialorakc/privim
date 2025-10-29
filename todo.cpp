@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "noteVim.hpp"
+#include "keys.hpp"
 
 using std::string;
 
@@ -69,64 +70,60 @@ int main(){
     vim.setThinCursor();
 
     bool run = 1, writeMode = 1;
+    struct timeval timeout;
     std::cout << border[0] << "  " << std::flush;
 
     while(run){
-        int byte = read(STDIN_FILENO, &word, 1);
-        std::cout << std::flush;
-        // perror("read");
 
-        if (writeMode){
-            if (word == '\x7f') {
-                std::cout << "\b \b" << std::flush;  // Move back, write space, move back again
-                continue;
-            }
-            if (word == '\033'){
-                writeMode = 0;
-                vim.setBlockCursor();
-                continue;
-            }
-            if (word >= 32 && word <= 126){
-                std::cout << word << std::flush;
-            }
-            if (word == '\n' || word == '\r'){
-                std::cout << '\n' << border[0] << "  " << std::flush;
-                funky.sideRule(mult, border, 4);
-                std::cout << '\n' << border[0] << "  " << std::flush;
-            }
+        fd_set readch;
+        FD_ZERO(&readch);
+        FD_SET(STDIN_FILENO, &readch);
+
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 10 * miliSec;
+
+        int complete = select(STDIN_FILENO + 1, &readch, NULL, NULL, &timeout);
+
+        if (vim.termPosUpdater()){
+            putp(tigetstr("clear"));
+            mult = vim.termWidth();
+
+            funky.endRule(mult, border, 1);
+            std::cout << '\n' << border[0] << '\n';
+            std::cout << border[0] << "  This is a simple note taking program with nvim integration\n";
+            funky.endRule(mult, border, 0);
+            std::cout << '\n';
+            funky.endRule(mult, border, 1);
+            std::cout << '\n' << border[0] << '\n';
+            vim.rightCommand("@Dialore.", 2, 4);
+            std::cout << border[0] << "  " << std::flush;
         }
-        else {
-            switch(word){
-                case 'k': {
-                              std::cout << vim.command[0] << std::flush;
-                              break;
-                          }
-                case 'j': {
-                              std::cout << vim.command[1] << std::flush;
-                              break;
-                          }
-                case 'l': {
-                              std::cout << vim.command[2] << std::flush;
-                              break;
-                          }
-                case 'h': {
-                              std::cout << vim.command[3] << std::flush;
-                              break;
-                          }
-                case 'D': {
-                              std::cout << vim.command[6] << std::flush;
-                              break;
-                          }
-                case 'd': {
-                              std::cout << vim.command[9] << std::flush;
-                              break;
-                          }
-                case 'i': writeMode = 1;
-                          vim.setThinCursor();
-                          break;
-                case 'q': std::cout << '\n';
-                          run = 0;
-                          break;
+
+        if (complete > 0){
+            int byte = read(STDIN_FILENO, &word, 1);
+            std::cout << std::flush;
+            // perror("read");
+
+            if (writeMode){
+                if (word == '\x7f') {
+                    std::cout << "\b \b" << std::flush;  // Move back, write space, move back again
+                    continue;
+                }
+                if (word == '\033'){
+                    writeMode = 0;
+                    vim.setBlockCursor();
+                    continue;
+                }
+                if (word >= 32 && word <= 126){
+                    std::cout << word << std::flush;
+                }
+                if (word == '\n' || word == '\r'){
+                    std::cout << '\n' << border[0] << "  " << std::flush;
+                    std::cout << '\n' << border[0] << "  " << std::flush;
+                }
+            }
+            else {
+                keyBind(vim, word, &writeMode, &run);
             }
         }
     };

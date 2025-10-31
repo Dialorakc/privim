@@ -2,6 +2,7 @@
 #include <string>
 #include "noteVim.hpp"
 #include "keys.hpp"
+#include "frameBuffer.hpp"
 
 using std::string;
 
@@ -35,6 +36,7 @@ int main(){
     bool end = 1;
     Funk funky;
     VimBind vim;
+    Ditter differ;
     int mult = vim.termWidth();
 
     /* opens new buffer */
@@ -54,12 +56,7 @@ int main(){
     std::cout << "\033[38;2;216;213;8m";
     putp(tigetstr("clear"));
 
-    funky.endRule(mult, border, end);
-    std::cout << '\n' << border[0] << '\n';
-    std::cout << border[0] << "  This is a simple note taking program with nvim integration\n";
-    funky.endRule(mult, border, 0);
-    std::cout << '\n';
-
+    differ.buffer();
     funky.endRule(mult, border, 1);
     std::cout << '\n' << border[0] << '\n';
     vim.termHeight();

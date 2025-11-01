@@ -36,7 +36,7 @@ int main(){
     bool end = 1;
     Funk funky;
     VimBind vim;
-    Ditter differ;
+    Ditter fBuffer;
     int mult = vim.termWidth();
 
     /* opens new buffer */
@@ -45,18 +45,23 @@ int main(){
     putp(tigetstr("smcup"));
     std::cout << std::flush;
 
-    /* Draw background */
+    /* Draw background
     for(int r = 0; r < vim.termHeight(); r++){
         std::cout << "\033[" << r + 1 << ";1H";
         std::cout << "\033[48;2;206;89;40m";
     }
+    */
 
     /* Draw content on top */
     std::cout << "\033[1;1H";
     std::cout << "\033[38;2;216;213;8m";
-    putp(tigetstr("clear"));
+    // putp(tigetstr("clear"));
 
-    differ.buffer();
+    fBuffer.clear(0, 0, 0);
+    for (int y = 0; y < fBuffer.getHeight(); y++) {
+        fBuffer.setPixel(0, y, 0, 255, 0);
+    }
+
     funky.endRule(mult, border, 1);
     std::cout << '\n' << border[0] << '\n';
     vim.termHeight();
@@ -85,9 +90,6 @@ int main(){
             putp(tigetstr("clear"));
             mult = vim.termWidth();
 
-            funky.endRule(mult, border, 1);
-            std::cout << '\n' << border[0] << '\n';
-            std::cout << border[0] << "  This is a simple note taking program with nvim integration\n";
             funky.endRule(mult, border, 0);
             std::cout << '\n';
             funky.endRule(mult, border, 1);

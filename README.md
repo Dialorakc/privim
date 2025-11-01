@@ -1,5 +1,5 @@
      /\_/\
-    ( o.o )  privim v0.01a
+    ( o.o )  privim v0.01b
      > ⋈ <   (purr responsibly)
 
 *pronounced "prri-vim" if you're feeling fancy*
